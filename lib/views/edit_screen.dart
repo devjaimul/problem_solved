@@ -1,19 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:polynotepad/local_db/db_helper.dart';
+
 class EditScreen extends StatefulWidget {
-  const EditScreen({super.key});
+  final int id;
+  final String title;
+  final String description;
+
+  const EditScreen({super.key, required this.title, required this.description, required this.id});
 
   @override
   State<EditScreen> createState() => _EditScreenState();
 }
 
 class _EditScreenState extends State<EditScreen> {
-
-
-  final titleEditController =  TextEditingController();
-  final descriptionEditController =  TextEditingController();
+  final titleEditController = TextEditingController();
+  final descriptionEditController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  @override
+  void initState() {
+    super.initState();
+    setData();
+  }
+
+  void setData() {
+    setState(() {
+      titleEditController.text = widget.title;
+      descriptionEditController.text = widget.description;
+    });
+  }
 
   void _onTapAddProductButton() {
     if (_formKey.currentState!.validate()) {
@@ -22,12 +37,16 @@ class _EditScreenState extends State<EditScreen> {
   }
 
   Future<void> addNewProduct() async {
-    // Save the product after validation
-    if (titleEditController.text.isNotEmpty && descriptionEditController.text.isNotEmpty) {
-      await DbHelper().addlist(context, titleEditController.text, descriptionEditController.text);
-    } else {
+    if (titleEditController.text.isEmpty || descriptionEditController.text.isEmpty) {
       var snackBar = SnackBar(content: Text('All fields are required!'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
+      await DbHelper().update(widget.id, {
+        "title": titleEditController.text,
+        "description": descriptionEditController.text,
+      }, context);
+
+      Navigator.pop(context, true); // Return true to indicate the update was successful
     }
   }
 
@@ -35,23 +54,19 @@ class _EditScreenState extends State<EditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit note",style: TextStyle(
-            color: Colors.black
-        )),
+        title: Text("Edit note", style: TextStyle(color: Colors.black)),
         centerTitle: true,
       ),
-      body:SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: Form(
             key: _formKey,
             child: Column(
               children: [
-                SizedBox(
-                  height: 20,
-                ),
+                SizedBox(height: 20),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -60,7 +75,7 @@ class _EditScreenState extends State<EditScreen> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 7,
-                        offset: Offset(0, 3), // changes position of shadow
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
@@ -70,21 +85,17 @@ class _EditScreenState extends State<EditScreen> {
                       icon: Icon(Icons.title),
                       hintText: 'Enter your title here',
                     ),
-                    validator: (String? value){
-                      if(value==null|| value.isEmpty){
-                        return'Enter a valid Name';
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Enter a valid title';
                       }
                       return null;
                     },
-                    textAlignVertical: TextAlignVertical.top,
-                    textAlign: TextAlign.start,
                   ),
                 ),
-                SizedBox(
-                  height: 20,
-                ),
+                SizedBox(height: 20),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -93,54 +104,34 @@ class _EditScreenState extends State<EditScreen> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 7,
-                        offset: Offset(0, 3), // changes position of shadow
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
                   child: TextFormField(
-                    validator: (String? value){
-                      if(value==null|| value.isEmpty){
-                        return'Enter a valid Name';
+                    controller: descriptionEditController,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.description),
+                      hintText: 'Enter your description here',
+                    ),
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Enter a valid description';
                       }
                       return null;
                     },
-                    controller: descriptionEditController,
-                    textAlignVertical: TextAlignVertical.top,
-                    textAlign: TextAlign.start,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.title),
-                      hintText: 'Enter description here',
-                    ),
-                    maxLines: 5,
-                    onSaved: (String? value) {
-
-                    },
                   ),
                 ),
-                SizedBox(
-                  height: 30,
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _onTapAddProductButton,
+                  child: const Text("Save"),
                 ),
-                Container(
-                    width: MediaQuery.sizeOf(context).width,
-                    child: ElevatedButton(onPressed: _onTapAddProductButton, child:  Text("Save"),))
-
-                // async{
-                //   if(titleEditController.text.isEmpty || descriptionEditController.text.isEmpty){
-                //     var snackBar = SnackBar(content: Text('All field are required !'));
-                //     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                //   }else{
-                //     await DbHelper().addlist(context, titleEditController.text, descriptionEditController.text);
-                //   }
-                // }, child: Text("Save"),),),
-
               ],
             ),
           ),
-
         ),
       ),
     );
-
   }
-
 }

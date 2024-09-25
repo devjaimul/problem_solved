@@ -19,10 +19,9 @@ class CustomlistState extends State<Customlist> {
   }
 
   void readDatabase() async {
-    final Datalist = await DbHelper().readData();
-    print(Datalist);
+    final dataList = await DbHelper().readData();
     setState(() {
-      item = Datalist ?? []; // Ensure non-null value
+      item = dataList ?? []; // Ensure non-null value
     });
   }
 
@@ -35,6 +34,8 @@ class CustomlistState extends State<Customlist> {
           : ListView.builder(
         itemCount: item.length,
         itemBuilder: (context, index) {
+          final note = item[index]; // Access each note
+
           return Column(
             children: [
               Card(
@@ -56,17 +57,28 @@ class CustomlistState extends State<Customlist> {
                       ),
                     ),
                     title: Text(
-                      "${item[index]["title"]}",
+                      "${note["title"]}",
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text("${item[index]["description"]}"),
+                    subtitle: Text("${note["description"]}"),
                     trailing: IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => EditScreen()));
+                      onPressed: () async {
+                        // Navigate to EditScreen and pass the selected note's data
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditScreen(
+                              id: note['id'],
+                              title: note['title'],
+                              description: note['description'],
+                            ),
+                          ),
+                        );
+                        // Refresh the list after returning from EditScreen
+                        if (result == true) {
+                          readDatabase(); // Refresh the list
+                        }
                       },
                       icon: const Icon(Icons.edit),
                     ),

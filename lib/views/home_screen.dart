@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:polynotepad/views/add_screen.dart';
 import 'package:polynotepad/views/profile_screen.dart';
+
 import '../global widgets/customlist.dart';
 
 
@@ -21,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal, // App bar color
+        backgroundColor: Colors.teal,
         title: const Text("Note Pad"),
         centerTitle: true,
         automaticallyImplyLeading: false,

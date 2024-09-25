@@ -35,4 +35,11 @@ class DbHelper {
     Database? db = await database;
     return await db?.query("Datalist");
   }
+
+  Future<dynamic> update(int? id, Map<String, dynamic> data, BuildContext context) async {
+    Database? db = await database;
+    await db?.update("Datalist", data, where: 'id = ?', whereArgs: [id]);
+    var snackBar = SnackBar(content: Text('Data updated successfully!'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 }
